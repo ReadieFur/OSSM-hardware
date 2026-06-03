@@ -38,11 +38,8 @@ double easeInOutSine(double t) {
 
 class StateCallbacks : public NimBLECharacteristicCallbacks {
     void onRead(NimBLECharacteristic* pCharacteristic, NimBLEConnInfo& connInfo) override {
-        if (!ossm)
-            return;
-        String currentState = ossm->getCurrentState();
-        pCharacteristic->setValue(currentState);
-        ESP_LOGD(NIMBLE_TAG, "State read: %s", currentState.c_str());
+        if (!ossm) return;
+        pCharacteristic->setValue(ossm->getCurrentState());
     }
 } stateCallbacks;
 
