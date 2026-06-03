@@ -36,6 +36,16 @@ double easeInOutSine(double t) {
     return 0.5 * (1 + sin(3.1415926 * (t - 0.5)));
 }
 
+class StateCallbacks : public NimBLECharacteristicCallbacks {
+    void onRead(NimBLECharacteristic* pCharacteristic, NimBLEConnInfo& connInfo) override {
+        if (!ossm)
+            return;
+        String currentState = ossm->getCurrentState();
+        pCharacteristic->setValue(currentState);
+        ESP_LOGD(NIMBLE_TAG, "State read: %s", currentState.c_str());
+    }
+} stateCallbacks;
+
 /** Handler class for server actions */
 class ServerCallbacks : public NimBLEServerCallbacks {
     void onConnect(NimBLEServer* pServer, NimBLEConnInfo& connInfo) override {
@@ -306,6 +316,7 @@ void initNimble() {
 
     pStateCharacteristic = initStateCharacteristic(
         pService, NimBLEUUID(CHARACTERISTIC_STATE_UUID));
+    pStateCharacteristic->setCallbacks(&stateCallbacks);
 
     initPatternsCharacteristic(pService,
                                NimBLEUUID(CHARACTERISTIC_PATTERNS_UUID));
