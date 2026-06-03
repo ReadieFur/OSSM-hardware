@@ -1,7 +1,7 @@
 #include "board.h"
 
 bool USE_LATENCY_COMPENSATION = false;
-bool USE_SPEED_KNOB_AS_LIMIT = true;
+bool USE_SPEED_KNOB_AS_LIMIT = false;
 
 void initBoard() {
     Serial.begin(115200);
