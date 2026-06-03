@@ -2,7 +2,7 @@
 #define STROKE_ENGINE_HELPER_H
 #include <config.h>
 
-#include "../lib/StrokeEngine/src/StrokeEngine.h"
+#include "../../lib/StrokeEngine/src/StrokeEngine.h"
 #include "constants/Config.h"
 #include "constants/Pins.h"
 
@@ -13,10 +13,12 @@
 ##################################################################################################*/
 
 // enum of stroke engine states
-enum PlayControls { STROKE, DEPTH, SENSATION, BUFFER};
+enum PlayControls { STROKE, DEPTH, SENSATION, CURRENT_THRESHOLD };
 
 static motorProperties servoMotor{
-    .maxSpeed = Config::Driver::maxSpeedMmPerSecond,
+    .maxSpeed =
+        60 * (Config::Driver::maxSpeedMmPerSecond /
+              (Config::Driver::pulleyToothCount * Config::Driver::beltPitchMm)),
     .maxAcceleration = Config::Driver::maxAcceleration,
     .stepsPerMillimeter =
         Config::Driver::motorStepPerRevolution /
@@ -35,5 +37,6 @@ static bool isChangeSignificant(float oldPct, float newPct) {
 static float calculateSensation(float sensationPercentage) {
     return float((sensationPercentage * 200.0) / 100.0) - 100.0f;
 }
+
 
 #endif

@@ -17,9 +17,12 @@ namespace Tasks {
     extern TaskHandle_t runSimplePenetrationTaskH;
     extern TaskHandle_t runStrokeEngineTaskH;
 
-    // Constants can stay in the header
-    constexpr int stepperCore = 1;
-    constexpr int operationTaskCore = 0;
-}
+static TaskHandle_t runHomingTaskH = nullptr;
+static TaskHandle_t runSimplePenetrationTaskH = nullptr;
+static TaskHandle_t runStrokeEngineTaskH = nullptr;
+static TaskHandle_t currentMonitoringTaskH = nullptr;
+
+static const int stepperCore = 1;
+static const int operationTaskCore = 0;
 
 #endif  // OSSM_SOFTWARE_TASKS_H
