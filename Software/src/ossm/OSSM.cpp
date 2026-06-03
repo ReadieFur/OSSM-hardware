@@ -185,4 +185,5 @@ String OSSM::getCurrentState() {
            ",\"load\":" + String(lastCurrentReading, 2) +
            ",\"position\":" + String(positionMm, 2) +
            ",\"sessionId\":\"" + sessionId + "\"}";
+        //    "\",\"meta\":\"" + "{}"
 }
