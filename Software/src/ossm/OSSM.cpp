@@ -33,7 +33,7 @@ OSSM::OSSM() {
 
 void OSSM::ble_click(String commandString) {
     CommandValue command = commandFromString(commandString);
-    ESP_LOGD("OSSM", "COMMAND: %d", command.command);
+    ESP_LOGD("OSSM", "COMMAND: %d | %s", command.command, commandString.c_str());
 
     String currentState;
     if (stateMachine != nullptr) {
