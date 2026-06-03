@@ -272,21 +272,32 @@ namespace ui {
                 case PlayControl::STROKE:
                     drawShape::settingBarSmall(u8g2, data.sensation, 125);
                     drawShape::settingBarSmall(u8g2, data.depth, 120);
+                    drawShape::settingBarSmall(u8g2, data.currentThreshold, 103);
                     drawShape::settingBar(u8g2, strokeLabel, data.stroke, 118,
-                                          0, RIGHT_ALIGNED);
+                                          0, RIGHT_ALIGNED, 5);
+
                     break;
                 case PlayControl::SENSATION:
                     drawShape::settingBar(u8g2, strings::sensation,
                                           data.sensation, 128, 0, RIGHT_ALIGNED,
-                                          10);
+                                          15);
                     drawShape::settingBarSmall(u8g2, data.depth, 113);
                     drawShape::settingBarSmall(u8g2, data.stroke, 108);
+                    drawShape::settingBarSmall(u8g2, data.currentThreshold, 103);
                     break;
                 case PlayControl::DEPTH:
-                    drawShape::settingBarSmall(u8g2, data.sensation, 125);
+                    drawShape::settingBarSmall(u8g2, data.sensation, 125, 0);
                     drawShape::settingBar(u8g2, strings::depth, data.depth, 123,
                                           0, RIGHT_ALIGNED, 5);
                     drawShape::settingBarSmall(u8g2, data.stroke, 108);
+                    drawShape::settingBarSmall(u8g2, data.currentThreshold, 103);
+                    break;
+                case PlayControl::CURRENT_THRESHOLD:
+                    drawShape::settingBarSmall(u8g2, data.sensation, 125, 0);
+                    drawShape::settingBarSmall(u8g2, data.depth, 120);
+                    drawShape::settingBarSmall(u8g2, data.stroke, 115);
+                    drawShape::settingBar(u8g2, strings::currentThreshold, data.currentThreshold, 113,
+                                          0, RIGHT_ALIGNED);
                     break;
                 default:
                     break;
@@ -325,6 +336,9 @@ namespace ui {
                     drawShape::settingBar(u8g2, strings::depth, data.depth, 118,
                                           0, RIGHT_ALIGNED, 5);
                     drawShape::settingBarSmall(u8g2, data.stroke, 103);
+                    break;
+                // TODO: CURRENT_THRESHOLD
+                default:
                     break;
             }
         } else {

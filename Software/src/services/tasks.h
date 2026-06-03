@@ -16,6 +16,7 @@ namespace Tasks {
     extern TaskHandle_t runHomingTaskH;
     extern TaskHandle_t runSimplePenetrationTaskH;
     extern TaskHandle_t runStrokeEngineTaskH;
+    extern TaskHandle_t currentMonitoringTaskH;
 
     // Constants can stay in the header
     constexpr int stepperCore = 1;

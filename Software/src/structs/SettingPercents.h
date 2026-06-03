@@ -22,6 +22,7 @@ struct SettingPercents {
     StrokePatterns pattern;
     float speedKnob;
     std::optional<float> speedBLE = std::nullopt;
+    float currentThreshold;
 };
 
 #endif  // SOFTWARE_SETTINGPERCENTS_H

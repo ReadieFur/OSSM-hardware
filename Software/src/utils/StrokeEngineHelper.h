@@ -13,7 +13,7 @@
 ##################################################################################################*/
 
 // enum of stroke engine states
-enum PlayControls { STROKE, DEPTH, SENSATION, BUFFER};
+enum PlayControls { STROKE, DEPTH, SENSATION, BUFFER, CURRENT_THRESHOLD };
 
 static motorProperties servoMotor{
     .maxSpeed = Config::Driver::maxSpeedMmPerSecond,

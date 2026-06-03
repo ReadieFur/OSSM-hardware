@@ -24,7 +24,9 @@ SettingPercents OSSM::setting = {.speed = 0,
                                  .sensation = 50,
                                  .depth = 10,
                                  .buffer = 100,
-                                 .pattern = StrokePatterns::SimpleStroke};
+                                 .pattern = StrokePatterns::SimpleStroke,
+                                 .speedKnob = 0,
+                                 .currentThreshold = 100};
 
 OSSM::OSSM() {
     // Initialize global state from OSSM::setting
@@ -96,6 +98,11 @@ void OSSM::ble_click(String commandString) {
         case Commands::setPattern:
             settings.pattern = static_cast<StrokePatterns>(command.value % 7);
             break;
+        case Commands::setCurrentThreshold:
+            session.playControl = PlayControls::CURRENT_THRESHOLD;
+            encoder.setEncoderValue(command.value);
+            settings.currentThreshold = command.value;
+            break;
         case Commands::streamPosition:
             // Position (0-100)
             targetQueue.push({
@@ -145,8 +152,10 @@ String OSSM::getStateFingerprint() {
 // │   sensation  : integer  — cast from float                         │
 // │   depth      : integer  — cast from float                         │
 // │   pattern    : integer  — StrokePatterns enum ordinal             │
+// |   force      : number   — cast from float                         |
+// │   load       : number   — current sensor reading (float)          │
 // │   position   : number   — stepper position in mm (float)          │
-// │   sessionId  : UUID     — regenerated each time a play mode starts  │
+// │   sessionId  : UUID     — regenerated each time a play mode starts │
 // │                                                                    │
 // │ Optional fields:                                                   │
 // │   meta       : string   — JSON-encoded metadata (optional)         │
@@ -172,6 +181,8 @@ String OSSM::getCurrentState() {
            ",\"depth\":" + String((int)settings.depth) +
            ",\"buffer\":" + String((int)settings.buffer) +
            ",\"pattern\":" + String(static_cast<int>(settings.pattern)) +
+           ",\"force\":" + String((int)settings.currentThreshold) +
+           ",\"load\":" + String(lastCurrentReading, 2) +
            ",\"position\":" + String(positionMm, 2) +
            ",\"sessionId\":\"" + sessionId + "\"}";
 }

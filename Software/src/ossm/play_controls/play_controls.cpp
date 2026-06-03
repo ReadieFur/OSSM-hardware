@@ -29,6 +29,7 @@ static ui::PlayControl toUiPlayControl(PlayControls pc) {
         case PlayControls::SENSATION: return ui::PlayControl::SENSATION;
         case PlayControls::DEPTH:     return ui::PlayControl::DEPTH;
         case PlayControls::BUFFER:    return ui::PlayControl::BUFFER;
+        case PlayControls::CURRENT_THRESHOLD: return ui::PlayControl::CURRENT_THRESHOLD;
     }
     return ui::PlayControl::STROKE;
 }
@@ -49,6 +50,9 @@ static void drawPlayControlsTask(void *pvParameters) {
             break;
         case PlayControls::BUFFER:
             encoder.setEncoderValue(settings.buffer);
+            break;
+        case PlayControls::CURRENT_THRESHOLD:
+            encoder.setEncoderValue(settings.currentThreshold);
             break;
     }
 
@@ -133,6 +137,12 @@ static void drawPlayControlsTask(void *pvParameters) {
                     shouldUpdateDisplay || next.buffer - settings.buffer >= 1;
                 settings.buffer = next.buffer;
                 break;
+            case PlayControls::CURRENT_THRESHOLD:
+                next.currentThreshold = encoderValue;
+                shouldUpdateDisplay = shouldUpdateDisplay ||
+                                      next.currentThreshold - settings.currentThreshold >= 1;
+                settings.currentThreshold = next.currentThreshold;
+                break;
         }
 
         shouldUpdateDisplay =
@@ -171,6 +181,7 @@ static void drawPlayControlsTask(void *pvParameters) {
             data.sensation = settings.sensation;
             data.depth = settings.depth;
             data.buffer = settings.buffer;
+            data.currentThreshold = settings.currentThreshold;
             data.activeControl = toUiPlayControl(session.playControl);
             data.strokeCount = session.strokeCount;
             data.distanceMeters = session.distanceMeters;

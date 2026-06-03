@@ -14,6 +14,7 @@
 #include "structs/SettingPercents.h"
 #include "utils/StrokeEngineHelper.h"
 #include "utils/getEfuseMac.h"
+#include "utils/analog.h"
 
 namespace sml = boost::sml;
 using namespace sml;
@@ -57,6 +58,15 @@ static void startStrokeEngineTask(void *pvParameters) {
             lastSetting.speed = settings.speed;
         }
 
+        // Check for force safety trigger
+        static bool lastForceState = false;
+        bool currentForceState = ossm->isForceSafetyTriggered();
+        if (currentForceState && !lastForceState) {
+            ESP_LOGD("UTILS", "Force safety event processed");
+            ossm->setForceSafetyTriggered(false);
+        }
+        lastForceState = currentForceState;
+
         if (lastSetting.stroke != settings.stroke) {
             float newStroke = 0.01f * settings.stroke * abs(measuredStrokeMm);
             ESP_LOGD("UTILS", "change stroke: %f %f", settings.stroke,
@@ -78,6 +88,12 @@ static void startStrokeEngineTask(void *pvParameters) {
                      newSensation);
             Stroker.setSensation(newSensation, false);
             lastSetting.sensation = settings.sensation;
+        }
+
+        if (lastSetting.currentThreshold != settings.currentThreshold) {
+            ESP_LOGD("UTILS", "change current threshold: %f",
+                     settings.currentThreshold);
+            lastSetting.currentThreshold = settings.currentThreshold;
         }
 
         if (lastSetting.pattern != settings.pattern) {
@@ -128,6 +144,73 @@ static void startStrokeEngineTask(void *pvParameters) {
     vTaskDelete(nullptr);
 }
 
+void currentMonitoringTask(void *pvParameters) {
+    unsigned long lastTriggerTime = 0;
+    const unsigned long MIN_TRIGGER_INTERVAL_MS = 50;
+
+    auto isInCorrectState = []() {
+        return stateMachine->is("strokeEngine"_s) ||
+               stateMachine->is("strokeEngine.idle"_s) ||
+               stateMachine->is("strokeEngine.pattern"_s);
+    };
+
+    ESP_LOGD("UTILS", "Current monitoring task started");
+
+    static float lastThresholdSetting = -1.0f;
+    static float cachedThresholdFactor = 0.0f;
+    static bool cachedThresholdEnabled = false;
+
+    while (isInCorrectState()) {
+        if (settings.currentThreshold != lastThresholdSetting) {
+            lastThresholdSetting = settings.currentThreshold;
+            cachedThresholdEnabled = (settings.currentThreshold < 100);
+            cachedThresholdFactor = settings.currentThreshold / 100.0f * 50.0f;
+        }
+
+        float currentReading = getAnalogAveragePercent(
+                SampleOnPin{Pins::Driver::currentSensorPin, 3}) -
+            calibration.currentSensorOffset;
+
+        ossm->lastCurrentReading = currentReading;
+
+        unsigned long currentTime = millis();
+
+        if (cachedThresholdEnabled) {
+            bool thresholdExceeded = (currentReading > cachedThresholdFactor);
+
+            if (thresholdExceeded) {
+                bool canTrigger = (currentTime - lastTriggerTime) > MIN_TRIGGER_INTERVAL_MS;
+
+                if (canTrigger) {
+                    int32_t currentPosition = stepper->getCurrentPosition();
+                    int32_t currentTarget = stepper->targetPos();
+
+                    bool isForwardMove = (currentTarget > currentPosition);
+
+                    if (isForwardMove) {
+                        ESP_LOGW("UTILS", "Force threshold exceeded - stopping forward move at pos %d", currentPosition);
+
+                        bool stopAndAdvanceResult = Stroker.forceStopAndAdvance();
+                        if (!stopAndAdvanceResult) {
+                            ESP_LOGE("UTILS", "Failed to stop and advance pattern");
+                        }
+
+                        ossm->setForceSafetyTriggered(true);
+                        lastTriggerTime = currentTime;
+                    }
+                }
+            }
+        }
+
+        // Monitoring frequency of 1ms for responsiveness
+        vTaskDelay(pdMS_TO_TICKS(1));
+    }
+
+    ESP_LOGD("UTILS", "Current monitoring task exiting");
+    vTaskDelete(nullptr);
+}
+
+// TODO: Add a bluetooth publish in here?
 static void publishStateTask(void *pvParameters) {
     auto isInCorrectState = []() {
         return stateMachine->is("strokeEngine"_s) ||
@@ -173,6 +256,11 @@ void startStrokeEngine() {
                             stackSize, nullptr, configMAX_PRIORITIES - 1,
                             &Tasks::runStrokeEngineTaskH,
                             Tasks::operationTaskCore);
+
+    xTaskCreatePinnedToCore(currentMonitoringTask, "currentMonitoringTask",
+                        4096, nullptr, configMAX_PRIORITIES - 3,
+                        &Tasks::currentMonitoringTaskH,
+                        Tasks::operationTaskCore);
 
     xTaskCreatePinnedToCore(publishStateTask, "publishStateTask",
                             5 * configMINIMAL_STACK_SIZE, nullptr,

@@ -118,6 +118,9 @@ void ossmIncrementControlStrokeEngine() {
         case PlayControls::SENSATION:
             encoder.setEncoderValue(settings.sensation);
             break;
+        case PlayControls::CURRENT_THRESHOLD:
+            encoder.setEncoderValue(settings.currentThreshold);
+            break;
         default:
             break;
     }
@@ -137,6 +140,12 @@ void ossmIncrementControlStreaming() {
             break;
         case PlayControls::BUFFER:
             encoder.setEncoderValue(settings.buffer);
+            break;
+        // TODO
+        // case PlayControls::CURRENT_THRESHOLD:
+        //     encoder.setEncoderValue(settings.currentThreshold);
+        //     break;
+        default:
             break;
     }
 };

@@ -5,7 +5,7 @@
 
 namespace ui {
 
-enum class PlayControl { STROKE, DEPTH, SENSATION, BUFFER };
+enum class PlayControl { STROKE, DEPTH, SENSATION, BUFFER, CURRENT_THRESHOLD };
 
 struct PlayControlsData {
     float speed;
@@ -13,6 +13,7 @@ struct PlayControlsData {
     float sensation;
     float depth;
     float buffer;
+    float currentThreshold;
     PlayControl activeControl;
     int strokeCount;
     float distanceMeters;

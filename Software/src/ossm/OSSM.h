@@ -61,6 +61,10 @@ class OSSM {
     float targetVelocity = 0;
     uint16_t targetTime = 0;
 
+    // Current threshold safety variables
+    float lastCurrentReading = 0; // Store the last current reading for display
+    volatile bool forceSafetyTriggered = false;
+
     void moveTo(float intensity, uint16_t inTime) {
         targetPosition = constrain(intensity, 0.0f, 100.0f);
         targetTime = inTime;
@@ -80,6 +84,10 @@ class OSSM {
     void setBLEConnectionStatus(bool isConnected) {
         bleState.hasActiveConnection = isConnected;
     }
+
+    // Public methods for force safety state
+    bool isForceSafetyTriggered() const { return forceSafetyTriggered; }
+    void setForceSafetyTriggered(bool triggered) { forceSafetyTriggered = triggered; }
 
    private:
     bool isForward = true;

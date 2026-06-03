@@ -29,6 +29,7 @@ enum class Commands {
     setStroke,
     setWifi,
     setBuffer,
+    setCurrentThreshold,
 
     // STREAMING
     streamPosition,
@@ -78,6 +79,8 @@ inline CommandValue setCommandValue(const String& str) {
         return {Commands::setStroke, value, 0};
     } else if (command == "buffer") {
         return {Commands::setBuffer, value, 0};
+    } else if (command == "force") {
+        return {Commands::setCurrentThreshold, value, 0};
     } else {
         return {Commands::ignore, 0, 0};
     }
